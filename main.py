@@ -8,21 +8,22 @@ from ulauncher.api.shared.action.HideWindowAction import HideWindowAction
 
 logger = logging.getLogger(__name__)
 
-
-def get_active_session_id(user: str) -> str | None:
+def get_active_session_id() -> str | None:
     """
-    Returns the session ID of the active session for the given user.
+    Returns the session ID of the active session for the current user.
     If no active session is found, returns None.
     """
     try:
+        user = subprocess.check_output(['whoami'], text=True).strip()
         sessions = subprocess.check_output(['loginctl', 'list-sessions'], text=True).splitlines()
-        for line in sessions[1:]:  # Skip header
+        for line in sessions[1:]:  # Skip the header
             columns = line.split()
             if len(columns) >= 5 and columns[2] == user and 'active' in line:
                 return columns[0]
     except subprocess.CalledProcessError as e:
-        logger.info(f"Error retrieving sessions: {e}")
+        print(f"Error retrieving sessions: {e}")
     return None
+
 
 class SystemManagementDirect(Extension):
   def __init__(self):
