@@ -49,7 +49,7 @@ class KeywordQueryEventListener(EventListener):
       subprocess.Popen(['systemctl', 'poweroff', '-i'])
     if id == 'restart':
       subprocess.Popen(['systemctl', 'reboot', '-i'])
-    if id = 'logout':
+    if id == 'logout':
         session_id = get_active_session_id()
         if session_id:
             subprocess.run(['loginctl', 'terminate-session', session_id], check=True)
