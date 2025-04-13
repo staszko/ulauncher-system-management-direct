@@ -8,6 +8,22 @@ from ulauncher.api.shared.action.HideWindowAction import HideWindowAction
 
 logger = logging.getLogger(__name__)
 
+
+def get_active_session_id(user: str) -> str | None:
+    """
+    Returns the session ID of the active session for the given user.
+    If no active session is found, returns None.
+    """
+    try:
+        sessions = subprocess.check_output(['loginctl', 'list-sessions'], text=True).splitlines()
+        for line in sessions[1:]:  # Skip header
+            columns = line.split()
+            if len(columns) >= 5 and columns[2] == user and 'active' in line:
+                return columns[0]
+    except subprocess.CalledProcessError as e:
+        logger.info(f"Error retrieving sessions: {e}")
+    return None
+
 class SystemManagementDirect(Extension):
   def __init__(self):
     logger.info('Loading Gnome Settings Extension')
@@ -33,5 +49,13 @@ class KeywordQueryEventListener(EventListener):
       subprocess.Popen(['systemctl', 'poweroff', '-i'])
     if id == 'restart':
       subprocess.Popen(['systemctl', 'reboot', '-i'])
+    if id = 'logout':
+        session_id = get_active_session_id()
+        if session_id:
+            subprocess.run(['loginctl', 'terminate-session', session_id], check=True)
+            logger.info(f"Terminated session {session_id}.")
+        else:
+            logger.info("No active session found for current user.")
+
 
 SystemManagementDirect().run()
